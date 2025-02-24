@@ -1,0 +1,23 @@
+{
+  "name": "generative-design-ss25",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cagataycode/Generative-Design-ss25.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cagataycode/Generative-Design-ss25/issues"
+  },
+  "homepage": "https://github.com/cagataycode/Generative-Design-ss25#readme",
+  "description": "",
+  "dependencies": {
+    "canvas-sketch": "^0.7.7"
+  }
+}
