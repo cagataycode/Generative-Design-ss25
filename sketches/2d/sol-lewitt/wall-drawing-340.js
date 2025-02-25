@@ -16,7 +16,7 @@ const sketch = () => {
   const palette = palettes[Math.floor(Math.random() * palettes.length)];
 
   // select a shape
-  const shapes = ["rectangle", "circle"];
+  const shapes = ["rectangle", "circle", "triangle"];
   const selectedShape = shapes[Math.floor(Math.random() * shapes.length)];
 
   return ({ context, width, height }) => {
@@ -37,7 +37,7 @@ const sketch = () => {
     const lineWidth = 4;
     context.lineWidth = lineWidth;
 
-    // Draw the selected shape with vertical lines
+    // draw the selected shape with vertical lines
     context.strokeStyle = shapeLineColor;
 
     if (selectedShape === "rectangle") {
@@ -65,9 +65,78 @@ const sketch = () => {
 
       // circle border
       context.strokeStyle = palette[1];
-
       context.beginPath();
       context.arc(centerX, centerY, size, 0, Math.PI * 2);
+      context.stroke();
+
+      // :O
+    } else if (selectedShape === "triangle") {
+      // Calculate triangle points
+      const topX = centerX;
+      const topY = centerY - size;
+      const leftX = centerX - size * Math.cos(Math.PI / 6);
+      const leftY = centerY + size * Math.sin(Math.PI / 6);
+      const rightX = centerX + size * Math.cos(Math.PI / 6);
+      const rightY = leftY;
+
+      // Function to check if a point is inside the triangle
+      const isInsideTriangle = (px, py) => {
+        const v0x = rightX - leftX;
+        const v0y = rightY - leftY;
+        const v1x = topX - leftX;
+        const v1y = topY - leftY;
+        const v2x = px - leftX;
+        const v2y = py - leftY;
+
+        const dot00 = v0x * v0x + v0y * v0y;
+        const dot01 = v0x * v1x + v0y * v1y;
+        const dot02 = v0x * v2x + v0y * v2y;
+        const dot11 = v1x * v1x + v1y * v1y;
+        const dot12 = v1x * v2x + v1y * v2y;
+
+        const invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+        const u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+        const v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+        return u >= 0 && v >= 0 && u + v < 1;
+      };
+
+      // Draw the triangle
+      context.beginPath();
+      context.moveTo(topX, topY);
+      context.lineTo(leftX, leftY);
+      context.lineTo(rightX, rightY);
+      context.closePath();
+      context.stroke();
+
+      // Draw vertical lines inside the triangle
+      for (let x = Math.floor(leftX); x <= Math.ceil(rightX); x += 20) {
+        let startY = null;
+        let endY = null;
+
+        for (let y = Math.floor(topY); y <= Math.ceil(leftY); y++) {
+          if (isInsideTriangle(x, y)) {
+            if (startY === null) startY = y;
+            endY = y;
+          } else if (startY !== null) {
+            break;
+          }
+        }
+
+        if (startY !== null && endY !== null) {
+          context.moveTo(x, startY);
+          context.lineTo(x, endY);
+        }
+      }
+      context.stroke();
+
+      // Triangle border
+      context.strokeStyle = palette[2];
+      context.beginPath();
+      context.moveTo(topX, topY);
+      context.lineTo(leftX, leftY);
+      context.lineTo(rightX, rightY);
+      context.closePath();
       context.stroke();
     }
 
@@ -95,6 +164,21 @@ const sketch = () => {
           context.moveTo(0, y);
           context.lineTo(centerX - size, y);
           context.moveTo(centerX + size, y);
+          context.lineTo(width, y);
+        }
+      } else if (selectedShape === "triangle") {
+        const topY = centerY - size;
+        const baseY = centerY + size * Math.sin(Math.PI / 6);
+        if (y < topY || y > baseY) {
+          context.moveTo(0, y);
+          context.lineTo(width, y);
+        } else {
+          const progress = (y - topY) / (baseY - topY);
+          const leftX = centerX - size * Math.cos(Math.PI / 6) * progress;
+          const rightX = centerX + size * Math.cos(Math.PI / 6) * progress;
+          context.moveTo(0, y);
+          context.lineTo(leftX, y);
+          context.moveTo(rightX, y);
           context.lineTo(width, y);
         }
       }
